@@ -1,0 +1,150 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 100% 99%; /* whitesmoke */
+    --foreground: 0 0% 11%;    /* #1c1c1c */
+    --card: 240 100% 99%;
+    --card-foreground: 0 0% 11%;
+    --popover: 240 100% 99%;
+    --popover-foreground: 0 0% 11%;
+    --primary: 190 49% 21%;      /* #1d4851 - --accent */
+    --primary-foreground: 240 100% 99%; /* --white */
+    --secondary: 0 0% 20%;      /* #333333 - --grey */
+    --secondary-foreground: 240 100% 99%; /* --white */
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 190 49% 21%;        /* #1d4851 */
+    --accent-foreground: 240 100% 99%; /* --white */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 190 49% 21%;        /* accent */
+    --radius: 0.125rem; /* Updated border radius for buttons */
+
+    /* Custom colors */
+    --accent: 190 49% 21%;      /* #1d4851 */
+    --black:  0 0% 11%;          /* #1c1c1c */
+    --white:  240 100% 99%;       /* whitesmoke */
+    --grey:   0 0% 20%;          /* #333333 */
+    --success: 180 25% 25%;     /* darkslategrey */
+
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    /* Define dark mode variables if needed, otherwise inherit or adjust */
+    --background: 0 0% 11%; /* #1c1c1c */
+    --foreground: 240 100% 99%; /* whitesmoke */
+    --card: 0 0% 11%;
+    --card-foreground: 240 100% 99%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 240 100% 99%;
+    --primary: 190 49% 21%;
+    --primary-foreground: 240 100% 99%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 240 100% 99%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 190 49% 21%;
+    --accent-foreground: 240 100% 99%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%; /* Using grey for border in dark */
+    --input: 0 0% 20%;
+    --ring: 190 49% 21%;
+    --success: 180 25% 30%; /* Slightly adjusted dark mode success */
+
+    /* Custom colors dark - can adjust if needed */
+    --accent: 190 49% 21%;
+    --black: 0 0% 11%;
+    --white: 240 100% 99%;
+    --grey: 0 0% 60%; /* Lighter grey for dark mode */
+    --success: 180 25% 30%; /* Consistent with main definition */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans text-base font-normal leading-normal;
+    font-family: var(--font-work-sans), sans-serif;
+    font-size: 1rem; /* 16px */
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased; /* Improve font rendering on macOS */
+    -moz-osx-font-smoothing: grayscale; /* Improve font rendering on macOS */
+  }
+
+  h1 {
+      @apply text-4xl font-black; /* 4rem */
+  }
+
+  h2 {
+      @apply text-2xl md:text-3xl font-bold; /* Updated H2 size */
+  }
+
+   /* Apply custom button styles */
+  .btn {
+    @apply rounded-[--radius] px-5 py-3 font-semibold transition;
+  }
+  .btn-primary {
+    @apply text-[color:var(--white)] bg-[color:var(--accent)]; /* removed hover:opacity-90 */
+  }
+  .btn-secondary {
+    @apply text-[color:var(--accent)] border border-[color:var(--accent)] bg-transparent hover:bg-[color:var(--accent)] hover:text-[color:var(--white)];
+  }
+
+}
+
+/* CSS Only Loader */
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.dark .loader-overlay {
+  background-color: rgba(28, 28, 28, 0.7); /* Semi-transparent dark */
+}
+
+
+.loader-spinner {
+  border: 4px solid hsl(var(--muted)); /* Light grey border */
+  border-top: 4px solid hsl(var(--accent)); /* Accent color spinner */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Custom success background class */
+.bg-custom-success {
+  background-color: hsl(var(--success));
+  /* Ensure text color is white for contrast, especially if not using foreground variable */
+  color: hsl(var(--white)) !important;
+}
+
+/* Optional: Ensure dark mode has sufficient contrast */
+.dark .bg-custom-success {
+  background-color: hsl(var(--success)); /* Uses the dark mode success variable */
+  color: hsl(var(--white)) !important;
+}

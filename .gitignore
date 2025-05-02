@@ -1,0 +1,12 @@
+# Dépendances & artefacts
+node_modules/
+dist/
+out/
+.next/
+.vscode/
+.idea/
+
+# Logs, OS, env
+*.log
+.DS_Store
+.env*
