@@ -2,7 +2,8 @@ import type {Metadata} from 'next';
 import { Work_Sans } from 'next/font/google';
 import './globals.css';
 import 'leaflet/dist/leaflet.css';
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
+import IframeResizer from "@/components/IframeResizer";
 
 const workSans = Work_Sans({
   variable: '--font-work-sans',
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body className={`${workSans.variable} antialiased font-sans text-base font-normal leading-normal bg-white text-black`}>
         {children}
         <Toaster />
+        <IframeResizer /> 
       </body>
     </html>
   );
