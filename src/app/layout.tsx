@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${workSans.variable} antialiased font-sans text-base font-normal leading-normal text-black`}>
+      <body className={`${workSans.variable} antialiased font-sans text-base font-normal leading-normal`}>
         {children}
         <Toaster />
         <IframeResizer /> 
