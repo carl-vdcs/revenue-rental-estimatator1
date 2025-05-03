@@ -64,12 +64,13 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
   };
 
   return (
-     <div className="shadow-lg rounded bg-[color:var(--white)] max-w-lg mx-auto p-4 md:p-6">
+     <div className="shadow-lg rounded border border-border max-w-lg mx-auto p-4 md:p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-
-            <h2 className="text-2xl font-bold text-center mb-6 text-card-foreground">Estimer votre bien</h2>
-
+            <div className="flex items-center justify-center mb-6">
+              <h2 className="text-2xl font-bold text-card-foreground">Estimer un bien</h2>
+              <span className="ml-2 inline-block rounded px-2 py-0.5 text-xs font-semibold bg-accent/10 text-accent">Bêta gratuite</span>
+            </div>
 
             <FormField
               control={form.control}

@@ -73,7 +73,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Martinique Estimator Widget<span className="ml-2 inline-block rounded px-2 py-0.5 text-xs font-semibold bg-accent/10 text-accent">Bêta gratuite</span></h1>
+      {/* Suppression du H1 ici, le badge sera déplacé dans EstimatorForm */}
 
       {!results && !isLoading && ( // Only show form if not loading and no results yet
         <EstimatorForm
