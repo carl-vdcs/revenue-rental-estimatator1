@@ -97,7 +97,7 @@ const SimilarListings: React.FC = () => {
               alt={`Image de ${listing.name}`}
               width={96}
               height={64}
-              className="rounded object-cover shrink-0"
+              className="rounded object-cover object-center shrink-0 aspect-[3/2] bg-gray-100"
               onError={(e) => (e.currentTarget.src = FALLBACK_IMG)}
               data-ai-hint={listing.imageHint}
             />
