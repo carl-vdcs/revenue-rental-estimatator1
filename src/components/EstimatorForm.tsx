@@ -190,7 +190,7 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
 
             <Button
               type="submit"
-              className="btn-primary w-full sm:w-52 sm:mx-auto mt-6 transform-gpu hover:-translate-y-0.5 hover:shadow-md disabled:opacity-40"
+              className="btn-primary w-full mt-6 transform-gpu hover:-translate-y-0.5 hover:shadow-md disabled:opacity-40 sm:block sm:w-52 sm:mx-auto"
               disabled={!form.formState.isValid || isLoading}
               aria-live="polite"
               aria-busy={isLoading}
