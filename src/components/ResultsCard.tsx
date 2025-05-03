@@ -82,6 +82,12 @@ const ResultsCard: React.FC<ResultsCardProps> = ({ results, params }) => {
     */
   }, []);
 
+  useEffect(() => {
+    window.parent.postMessage(
+      { type: "resizeEstimator", height: document.body.scrollHeight },
+      "*"
+    );
+  }, [results]);
 
   const { medianPrice, p75Price, annualRevenue, highSeasonAverage, lowSeasonAverage, latitude, longitude } = results;
   const { currentPrice } = params;
@@ -119,7 +125,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({ results, params }) => {
          <CardTitle className="text-xl font-bold text-primary">Vos revenus potentiels</CardTitle>
          {/* Disclaimer updated and contrast adjusted */}
          <CardDescription className="text-sm text-muted-foreground">
-            Basé sur les prix et taux d’occupation réels.<br/>
+            Basé sur les prix et taux d'occupation réels.<br/>
             Aucune estimation de valeur immobilière.
          </CardDescription>
        </CardHeader>
