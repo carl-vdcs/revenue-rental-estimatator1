@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import type { EstimateParams } from '@/services/vdc-solutions'; // Keep type
+import LoaderOverlay from '@/components/Loader';
 
 // Validation Schema - Made currentPrice optional
 const formSchema = z.object({
@@ -199,6 +200,7 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
             </Button>
           </form>
         </Form>
+        {isLoading && <LoaderOverlay />}
      </div>
   );
 };

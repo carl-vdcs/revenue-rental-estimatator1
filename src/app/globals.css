@@ -83,6 +83,7 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased; /* Improve font rendering on macOS */
     -moz-osx-font-smoothing: grayscale; /* Improve font rendering on macOS */
+    overflow-x: hidden;
   }
 
   h1 {
