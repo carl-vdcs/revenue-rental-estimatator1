@@ -67,8 +67,8 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
      <div className="shadow-lg rounded border border-border max-w-lg mx-auto p-4 md:p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-            <div className="flex flex-col items-center justify-center mb-6 sm:flex-row sm:items-center sm:justify-center">
-              <span className="inline-block rounded px-2 py-0.5 text-xs font-semibold bg-accent/10 text-accent mb-2 sm:mb-0 sm:mr-2">Bêta gratuite</span>
+            <div className="flex flex-col items-center justify-center mb-6">
+              <span className="inline-block rounded px-2 py-0.5 pb-1 text-xs font-semibold bg-accent/10 text-accent mb-2">Bêta gratuite</span>
               <h2 className="text-2xl font-bold text-card-foreground">Estimer un bien</h2>
             </div>
 
