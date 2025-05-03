@@ -100,32 +100,15 @@ const SimilarListings: React.FC = () => {
             />
           </div>
           <div className="flex-grow overflow-hidden"> {/* Added overflow-hidden */}
-            <div className="flex justify-between items-start mb-1">
-               {/* Added truncate class */}
-              <h4 className="text-base font-semibold text-foreground truncate pr-2">{listing.name}</h4>
-              <Badge variant={getSourceBadgeVariant(listing.source)} className="text-xs ml-auto whitespace-nowrap flex-shrink-0">
-                {listing.source}
-              </Badge>
-            </div>
-            {/* Updated grid to 3 columns to include distance */}
-            <div className="text-sm text-muted-foreground grid grid-cols-3 gap-x-4 gap-y-1">
-               <div>
-                 <span className="font-medium">Prix moy.:</span> {formatCurrency(listing.avgPrice)}
-               </div>
-               <div>
-                 <span className="font-medium">Remplissage:</span> {listing.occupancy}%
-               </div>
-               <div> {/* Added Distance */}
-                 <span className="font-medium">Distance:</span> {formatDistance(listing.distance)}
-               </div>
-               <div>
-                 <span className="font-medium">Prix BS:</span> {formatCurrency(listing.lowSeasonPrice)}
-               </div>
-                <div>
-                 <span className="font-medium">Prix HS:</span> {formatCurrency(listing.highSeasonPrice)}
-               </div>
-               {/* Empty cell for alignment if needed */}
-               <div></div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="font-bold truncate">{listing.name}</div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 mt-2 sm:mt-0 sm:ml-4 text-xs text-right sm:text-left">
+                <span>Prix moy.: {formatCurrency(listing.avgPrice)}</span>
+                <span>Remplissage: {listing.occupancy}%</span>
+                <span>Distance: {formatDistance(listing.distance)}</span>
+              </div>
             </div>
           </div>
         </Card>
