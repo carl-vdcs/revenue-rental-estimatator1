@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 240 100% 99%; /* whitesmoke */
+    --background: transparent;
     --foreground: 0 0% 11%;    /* #1c1c1c */
     --card: 240 100% 99%;
     --card-foreground: 0 0% 11%;
@@ -76,7 +76,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans text-base font-normal leading-normal;
+    @apply text-foreground font-sans text-base font-normal leading-normal;
     font-family: var(--font-work-sans), sans-serif;
     font-size: 1rem; /* 16px */
     font-weight: 400;
