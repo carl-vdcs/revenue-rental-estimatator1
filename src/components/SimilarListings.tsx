@@ -56,6 +56,8 @@ const mockListings = [
   },
 ];
 
+const FALLBACK_IMG = "https://source.unsplash.com/96x64/?house";
+
 // Helper function to format currency
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value).replace(/\s/g, '\u00A0');
@@ -91,11 +93,12 @@ const SimilarListings: React.FC = () => {
         >
           <div className="flex-shrink-0">
             <Image
-              src={listing.imageUrl}
+              src={listing.imageUrl || FALLBACK_IMG}
               alt={`Image de ${listing.name}`}
-              width={100}
-              height={80}
-              className="rounded-sm object-cover"
+              width={96}
+              height={64}
+              className="rounded object-cover shrink-0"
+              onError={(e) => (e.currentTarget.src = FALLBACK_IMG)}
               data-ai-hint={listing.imageHint}
             />
           </div>
