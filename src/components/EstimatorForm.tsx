@@ -64,7 +64,7 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
   };
 
   return (
-     <div className="max-w-lg mx-auto bg-card rounded-lg shadow-md border border-border p-4 md:p-6">
+     <div className="shadow-lg rounded bg-[color:var(--white)] max-w-lg mx-auto p-4 md:p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
 
@@ -105,7 +105,7 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Adresse du logement (si vous n’avez pas de lien)</FormLabel>
+                  <FormLabel>Adresse du logement (si vous n'avez pas de lien)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="12 Rue de la Plage, Fort-de-France"
@@ -174,7 +174,7 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
                       />
                   </FormControl>
                   <FormDescription>
-                    Indiquez le prix que vous pratiquez aujourd’hui. {/* Updated help text */}
+                    Indiquez le prix que vous pratiquez aujourd'hui. {/* Updated help text */}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -188,8 +188,7 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
 
             <Button
               type="submit"
-              variant="primary"
-              className="w-full md:w-52 mt-4" // Adjusted width for desktop
+              className="btn-primary w-full sm:w-52 transform-gpu hover:-translate-y-0.5 hover:shadow-md"
               // Disable if form is invalid OR loading
               disabled={!form.formState.isValid || isLoading}
               aria-live="polite"
