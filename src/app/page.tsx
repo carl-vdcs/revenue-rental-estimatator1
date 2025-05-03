@@ -72,8 +72,8 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto px-2 py-8 flex flex-col items-center min-h-screen">
-      {/* Header Section Removed - Will be handled in Webflow */}
+    <main className="flex flex-col items-center min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Martinique Estimator Widget<span className="ml-2 inline-block rounded px-2 py-0.5 text-xs font-semibold bg-accent/10 text-accent">Bêta gratuite</span></h1>
 
       {!results && !isLoading && ( // Only show form if not loading and no results yet
         <EstimatorForm
