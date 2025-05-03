@@ -5,21 +5,13 @@ import { useEffect } from "react";
 
 export default function IframeResizer() {
   useEffect(() => {
-    const sendHeight = () => {
-      window.parent.postMessage(
-        { type: "resizeEstimator", height: document.body.scrollHeight },
-        "*"
-      );
+    const handleResize = () => {
+      const height = document.documentElement.scrollHeight;
+      window.parent.postMessage({ type: 'resizeEstimator', height, background: 'transparent' }, '*');
     };
-
-    // envoie initial
-    sendHeight();
-
-    // observe toute mutation de taille
-    const observer = new ResizeObserver(sendHeight);
-    observer.observe(document.body);
-
-    return () => observer.disconnect();
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return null; // rien à afficher à l'écran
