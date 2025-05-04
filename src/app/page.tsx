@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSessionState } from '@/hooks/useSessionState';
 import EstimatorForm from '@/components/EstimatorForm';
 import ResultsCard from '@/components/ResultsCard';
 import type { EstimateParams, EstimateResult } from '@/services/vdc-solutions';
@@ -9,9 +10,9 @@ import Loader from '@/components/Loader';
 
 export default function Home() {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<EstimateResult | null>(null);
-  const [params, setParams]   = useState<EstimateParams | null>(null);
+  const [loading, setLoading]  = useState(false);
+  const [results, setResults]  = useSessionState<EstimateResult | null>('estim-result', null);
+  const [params,  setParams]   = useSessionState<EstimateParams  | null>('estim-params', null);
 
   const handleSubmit = async (
     v: Omit<EstimateParams, 'currentPrice'> & { currentPrice?: number },
