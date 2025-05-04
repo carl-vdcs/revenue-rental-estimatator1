@@ -25,6 +25,9 @@ export interface EstimateParams {
  * Represents the estimation results for a property.
  */
 export interface EstimateResult {
+  seasonality: number;
+
+  comps: any;
   /**
    * The median price per night of comparable properties.
    */
@@ -75,7 +78,7 @@ export async function estimateProperty(params: EstimateParams): Promise<Estimate
   }
 
   // Simulate successful API response with mocked data
-  return {
+  /* return {
     medianPrice: 110, // Price per night
     p75Price: 145, // Price per night
     annualRevenue: 28500,
@@ -83,5 +86,5 @@ export async function estimateProperty(params: EstimateParams): Promise<Estimate
     lowSeasonAverage: 90,   // Example value
     latitude: 14.641528, // Example coordinates for Martinique (Fort-de-France approx)
     longitude: -61.024174
-  };
+  }; */
 }
