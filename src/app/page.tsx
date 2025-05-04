@@ -1,94 +1,95 @@
-// src/app/page.tsx
 'use client';
 
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import EstimatorForm from '@/components/EstimatorForm';
-import type { EstimateParams, EstimateResult } from '@/services/vdc-solutions'; // Import types
-import { useToast } from "@/hooks/use-toast"; // Import useToast for error handling
-import Loader from '@/components/Loader'; // Import Loader
+import type { EstimateParams, EstimateResult } from '@/services/vdc-solutions';
+import { useToast } from '@/hooks/use-toast';
+import Loader from '@/components/Loader';
 
-// Dynamically import ResultsCard with ssr disabled as it might use client-side features
+/* ------------- Lazy-load ResultsCard (no SSR) ------------------ */
 const ResultsCard = dynamic(() => import('@/components/ResultsCard'), {
   ssr: false,
-  loading: () => <Loader />, // Show loader while ResultsCard is loading
+  loading: () => <Loader />,
 });
 
-// Mock result data for UI validation
-const mockResults: EstimateResult = {
-  medianPrice: 110,
-  p75Price: 145,
-  annualRevenue: 28500,
-  highSeasonAverage: 150,
-  lowSeasonAverage: 90,
-  latitude: 14.641528, // Example coordinates for Martinique
-  longitude: -61.024174,
-};
+/* ------------- Helper pour construire la query ----------------- */
+const buildQuery = (p: EstimateParams) =>
+  new URLSearchParams({
+    address: p.address ?? '',
+    bedrooms: p.bedrooms ? String(p.bedrooms) : '',
+    price: p.currentPrice ? String(p.currentPrice) : '',
+  }).toString();
 
+/* ------------- Main Page Component ----------------------------- */
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<EstimateResult | null>(null);
-  const [estimateParams, setEstimateParams] = useState<EstimateParams | null>(null); // Store params for ResultsCard
   const { toast } = useToast();
 
-  const handleFormSubmit = (data: Omit<EstimateParams, 'currentPrice'> & { currentPrice?: number }) => {
-    console.log('Form submitted:', data);
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<EstimateResult | null>(null);
+  const [estimateParams, setEstimateParams] = useState<EstimateParams | null>(
+    null,
+  );
+
+  /* --------- handleSubmit déclenché par EstimatorForm ---------- */
+  const handleSubmit = async (
+    data: Omit<EstimateParams, 'currentPrice'> & { currentPrice?: number },
+  ) => {
     setIsLoading(true);
-    setResults(null); // Clear previous results
+    setResults(null);
 
-    // Ensure currentPrice is a number, default to 0 if undefined (as it's optional now)
-    const paramsWithPrice: EstimateParams = {
-        ...data,
-        currentPrice: data.currentPrice ?? 0, // Use 0 if undefined
+    // stocke les paramètres (le champ currentPrice est optionnel)
+    const params: EstimateParams = {
+      ...data,
+      currentPrice: data.currentPrice ?? 0,
     };
-    setEstimateParams(paramsWithPrice); // Store params including currentPrice
+    setEstimateParams(params);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      // Simulate "no comps" scenario for testing UI
-      if (data.address && data.address.toLowerCase().includes("inconnu")) {
-        setResults(null); // No results
+    try {
+      const base = process.env.NEXT_PUBLIC_API_BASE;
+      if (!base) throw new Error('NEXT_PUBLIC_API_BASE non défini');
+
+      const res = await fetch(`${base}/estimate?` + buildQuery(params), {
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+
+      const json: EstimateResult = await res.json();
+
+      // Vérifie qu'il y a bien des comparables
+      if (!json.comps || json.comps.length === 0) {
         toast({
-          title: "Erreur d'estimation",
-          description: "Pas assez d'annonces comparables dans un rayon de 5 km. Essayez avec une autre adresse.",
-          variant: "destructive",
+          title: 'Pas de comparables',
+          description:
+            'Pas assez d’annonces à moins de 5 km. Essayez une autre adresse.',
+          variant: 'destructive',
         });
+      } else {
+        setResults(json);
       }
-      // Simulate API error for testing UI
-      else if (data.address && data.address.toLowerCase().includes("erreur")) {
-         setResults(null); // No results
-         toast({
-            title: "Erreur API",
-            description: "Impossible de récupérer les données. Veuillez réessayer plus tard.",
-            variant: "destructive",
-         });
-      }
-      else {
-        // Simulate successful API response
-        setResults(mockResults);
-      }
-      setIsLoading(false); // Hide loader
-    }, 1500); // 1.5 second delay
+    } catch (err: any) {
+      console.error(err);
+      toast({
+        title: 'Erreur API',
+        description:
+          err.message ?? 'Impossible de récupérer les données pour le moment.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <main className="flex flex-col items-center min-h-screen">
-      {/* Suppression du H1 ici, le badge sera déplacé dans EstimatorForm */}
-
-      {!results && !isLoading && ( // Only show form if not loading and no results yet
-        <EstimatorForm
-          onSubmit={handleFormSubmit}
-          isLoading={isLoading} // Pass loading state
-        />
+      {!results && !isLoading && (
+        <EstimatorForm onSubmit={handleSubmit} isLoading={isLoading} />
       )}
 
       {isLoading && <Loader />}
 
-      {results && !isLoading && estimateParams && ( // Show results only when loaded and results exist
-        <>
-          <ResultsCard results={results} params={estimateParams} />
-          {/* Redundant Disclaimer and Autopilot CTA removed, they are inside ResultsCard now */}
-        </>
+      {results && !isLoading && estimateParams && (
+        <ResultsCard results={results} params={estimateParams} />
       )}
     </main>
   );
