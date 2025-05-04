@@ -1,126 +1,131 @@
-// src/components/SimilarListings.tsx
-import React from 'react';
-import Image from 'next/image';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+/* ----------------------------------------------------------------
+   SimilarListings.tsx
+----------------------------------------------------------------- */
+"use client";
 
-// Mock data for similar listings with distance
+import React from "react";
+import Image from "next/image";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+/* ---------- MOCK DATA (démo) ----------------------------------- */
 const mockListings = [
   {
     id: 1,
-    name: 'Villa Paradis Vert au Soleil Levant avec vue imprenable', // Longer name example
-    source: 'Airbnb',
-    imageUrl: 'https://picsum.photos/seed/villa1/100/80',
-    imageHint: 'tropical villa',
+    name: "Villa Paradis Vert au Soleil Levant avec vue imprenable",
+    source: "Airbnb",
+    imageUrl: "https://picsum.photos/seed/villa1/100/80",
+    imageHint: "tropical villa",
     avgPrice: 135,
-    lowSeasonPrice: 110,
-    highSeasonPrice: 160,
-    occupancy: 75, // Percentage
-    distance: 1.2, // km
+    occupancy: 75,
+    distance: 1.2,
   },
   {
     id: 2,
-    name: 'Bungalow Les Flots Bleus',
-    source: 'Booking.com',
-    imageUrl: 'https://picsum.photos/seed/bungalow1/100/80',
-    imageHint: 'beach bungalow',
+    name: "Bungalow Les Flots Bleus",
+    source: "Booking.com",
+    imageUrl: "https://picsum.photos/seed/bungalow1/100/80",
+    imageHint: "beach bungalow",
     avgPrice: 95,
-    lowSeasonPrice: 75,
-    highSeasonPrice: 120,
     occupancy: 68,
-    distance: 2.5, // km
+    distance: 2.5,
   },
   {
     id: 3,
-    name: 'Appartement Vue Mer Caraïbes',
-    source: 'Airbnb',
-    imageUrl: 'https://picsum.photos/seed/apt1/100/80',
-    imageHint: 'ocean view apartment',
+    name: "Appartement Vue Mer Caraïbes",
+    source: "Airbnb",
+    imageUrl: "https://picsum.photos/seed/apt1/100/80",
+    imageHint: "ocean view apartment",
     avgPrice: 115,
-    lowSeasonPrice: 90,
-    highSeasonPrice: 140,
     occupancy: 72,
-    distance: 0.8, // km
+    distance: 0.8,
   },
-    {
+  {
     id: 4,
-    name: 'Studio Cosy Centre Ville',
-    source: 'Abritel', // Example different source
-    imageUrl: 'https://picsum.photos/seed/studio1/100/80',
-    imageHint: 'city studio',
+    name: "Studio Cosy Centre Ville",
+    source: "Abritel",
+    imageUrl: "https://picsum.photos/seed/studio1/100/80",
+    imageHint: "city studio",
     avgPrice: 80,
-    lowSeasonPrice: 65,
-    highSeasonPrice: 95,
     occupancy: 80,
-    distance: 3.1, // km
+    distance: 3.1,
   },
 ];
 
-const FALLBACK_IMG = "https://source.unsplash.com/96x64/?house";
+/* ---------- helpers ------------------------------------------- */
+const FALLBACK_IMG = "/placeholder.jpg"; // mets une 96×64 dans /public
 
-// Helper function to format currency
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value).replace(/\s/g, '\u00A0');
-};
+const formatCurrency = (v: number) =>
+  new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  })
+    .format(v)
+    .replace(/\s/g, "\u00A0");
 
-const getSourceBadgeVariant = (source: string): 'secondary' | 'default' | 'destructive' | 'outline' => {
-  switch (source.toLowerCase()) {
-    case 'airbnb':
-      return 'destructive'; // Using destructive for Airbnb
-    case 'booking.com':
-      return 'default'; // Using default (primary) for Booking
-    case 'abritel':
-      return 'secondary'; // Using secondary for Abritel
-    default:
-      return 'outline'; // Using outline for others
-  }
-}
+const formatDistance = (d: number) => `${d.toFixed(1).replace(".", ",")} km`;
 
-// Helper function to format distance
-const formatDistance = (distance: number): string => {
-    return `${distance.toFixed(1).replace('.', ',')} km`;
-}
+const badgeVariant = (src: string): "secondary" | "destructive" | "default" =>
+  src.toLowerCase() === "airbnb"
+    ? "destructive"
+    : src.toLowerCase() === "booking.com"
+    ? "default"
+    : "secondary";
 
-const SimilarListings: React.FC = () => {
+/* ---------- component ----------------------------------------- */
+export default function SimilarListings() {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-secondary">Listings similaires dans votre secteur</h3>
-      {mockListings.map((listing, index) => (
+      <h3 className="text-lg font-semibold text-secondary">
+        Listings similaires dans votre secteur
+      </h3>
+
+      {mockListings.map((l, idx) => (
         <Card
-            key={listing.id}
-            // Add border-bottom, remove on last item
-            className={`flex items-start space-x-4 p-3 border-border bg-card shadow-sm ${index < mockListings.length - 1 ? 'border-b' : ''}`}
+          key={l.id}
+          className={`flex items-start gap-3 p-3 bg-card shadow-sm ${
+            idx < mockListings.length - 1 ? "border-b border-border" : ""
+          }`}
         >
-          <div className="flex-shrink-0">
-            <Image
-              src={listing.imageUrl || FALLBACK_IMG}
-              alt={`Image de ${listing.name}`}
-              width={96}
-              height={64}
-              className="rounded object-cover object-center shrink-0 aspect-[3/2] bg-gray-100"
-              onError={(e) => (e.currentTarget.src = FALLBACK_IMG)}
-              data-ai-hint={listing.imageHint}
-            />
-          </div>
-          <div className="flex-grow overflow-hidden"> {/* Added overflow-hidden */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="font-bold truncate">{listing.name}</div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 mt-2 sm:mt-0 sm:ml-4 text-xs text-right sm:text-left">
-                <span>Prix moy.: {formatCurrency(listing.avgPrice)}</span>
-                <span>Remplissage: {listing.occupancy}%</span>
-                <span>Distance: {formatDistance(listing.distance)}</span>
-              </div>
+          {/* vignette fixée 96×64 ------------------------------------------------ */}
+          <Image
+            src={l.imageUrl || FALLBACK_IMG}
+            alt={`Image de ${l.name}`}
+            width={96}
+            height={64}
+            className="rounded object-cover object-center shrink-0 bg-gray-100"
+            onError={(e) =>
+              ((e.target as HTMLImageElement).src = FALLBACK_IMG)
+            }
+            data-ai-hint={l.imageHint}
+            unoptimized
+          />
+
+          {/* détails ------------------------------------------------------------- */}
+          <div className="flex flex-col flex-1 min-w-0">
+            <div className="flex items-start gap-2">
+              <span className="flex-1 min-w-0 font-semibold text-sm leading-snug line-clamp-2">
+                {l.name}
+              </span>
+
+              <Badge variant={badgeVariant(l.source)} className="shrink-0">
+                {l.source}
+              </Badge>
+            </div>
+
+            <div className="mt-1 text-xs text-gray-600 flex flex-wrap gap-x-3">
+              <span>Prix moy. : {formatCurrency(l.avgPrice)}</span>
+              <span>Remplissage : {l.occupancy}%</span>
+              <span>Distance : {formatDistance(l.distance)}</span>
             </div>
           </div>
         </Card>
       ))}
-      <p className="text-xs text-muted-foreground mt-2">
-        BS : Basse Saison, HS : Haute Saison. Les prix sont indicatifs.
+
+      <p className="text-xs text-muted-foreground">
+        Données indicatives sur les 12&nbsp;derniers mois.
       </p>
     </div>
   );
-};
-
-export default SimilarListings;
+}
