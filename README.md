@@ -107,13 +107,24 @@ Le workflow fourni (`n8n-workflow.json`) contient :
 - **Géolocalisation précise** : Coordonnées approximatives basées sur la zone de recherche
 - **Rate limiting** : MCP Server peut être limité par les politiques anti-scraping d'Airbnb
 
-### Problème actuel - Images manquantes
-Le MCP Server récupère les données de comparables Airbnb (prix, description, localisation) mais **les images des logements ne sont pas extraites**. Le système utilise actuellement des images placeholder via Picsum Photos.
+### État actuel - Système fonctionnel ✅
+Le MCP Server récupère avec succès :
+- ✅ **Prix réels** des comparables Airbnb
+- ✅ **Équipements (amenities)** automatiquement extraits
+- ✅ **URLs directes** vers les annonces
+- ✅ **Noms des logements** et descriptions
+- ⚠️ **Images** : Placeholders Picsum (limitation technique)
 
-**Solutions possibles :**
-1. Améliorer le scraper MCP pour extraire les URLs d'images Airbnb
-2. Intégrer une API d'images immobilières tierces
-3. Permettre l'upload manuel d'images via l'interface
+**Exemple de réponse réelle :**
+```bash
+curl "http://localhost:9000/estimate?address=Fort-de-France&adults=2"
+```
+
+### Prochaines améliorations (voir ROADMAP.md)
+1. **Saisonnalité avancée** : Prix haute/basse saison par mois
+2. **Occupation réaliste** : Algorithme basé sur destination + saison  
+3. **Pagination intelligente** : Plus de comparables cohérents
+4. **Images automatiques** : Extraction depuis Airbnb
 
 ## Déploiement complet
 

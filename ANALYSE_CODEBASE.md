@@ -85,14 +85,31 @@ const [params, setParams] = useSessionState<EstimateParams | null>('estim-params
 
 ## Points d'amélioration
 
-### 1. Architecture distribuée bien implémentée ✅
-Le service d'estimation **EST implémenté** via n8n avec :
-- **Webhook `/estimate`** qui orchestre les appels
-- **Appel à `estimate-api:8080`** pour les données réelles
-- **Intégration MCP Server** pour les recherches Airbnb
-- **Traitement et formatage** des données de comparables
+### 1. Architecture distribuée entièrement fonctionnelle ✅
+Le service d'estimation **EST PLEINEMENT OPÉRATIONNEL** avec :
+- **API `/estimate`** fonctionnelle récupérant les vraies données Airbnb
+- **Équipements (amenities)** extraits automatiquement 
+- **URLs des logements** récupérées pour consultation
+- **Prix médians et P75** calculés sur données réelles
+- **Cache Redis** pour les performances
 
-**Architecture réelle** : Frontend Next.js → n8n Webhook → estimate-api + MCP Server → Données réelles
+**Exemple de réponse réelle** :
+```json
+{
+  "address": "Fort-de-France",
+  "medianPrice": 103,
+  "p75Price": 169,
+  "annualRevenue": 22557,
+  "comps": [
+    {
+      "name": "Étang Z'abricot Apartment – Marina",
+      "adr": 130,
+      "amenities": ["Bay view", "Sea view", "Hair dryer"],
+      "url": "https://www.airbnb.com/rooms/1263162401888880844"
+    }
+  ]
+}
+```
 
 ### 2. Incohérences dans la documentation
 - Le README mentionne **Vite** mais le projet utilise **Next.js**
@@ -178,9 +195,49 @@ Ce projet présente une **architecture microservices moderne et sophistiquée** 
 
 La seule limitation actuelle est la **documentation incomplète** qui ne reflète pas la sophistication réelle du système.
 
-## Score global : 8.5/10
-- **Architecture**: 10/10 (microservices moderne)
+## Roadmap MVP (État actuel)
+
+### ✅ Fonctionnalités opérationnelles
+- **Estimation automatique** : Données Airbnb réelles récupérées ✅
+- **Extraction des équipements** : Amenities automatiquement extraits ✅ 
+- **Cache multi-schéma** : Redis avec TTL optimisé ✅
+- **URLs des logements** : Liens directs vers les annonces Airbnb ✅
+- **Calculs précis** : Prix médian, P75, revenus annuels ✅
+
+### 🚧 En développement (Prochaines itérations)
+
+| Étape | Tâche | Statut | Priorité |
+|-------|-------|--------|----------|
+| 2 | **Algorithme occupation réaliste** | ⏳ | Haute |
+| | Basé sur seasonality + destination | | |
+| 3 | **Pagination intelligente** | ⏳ | Moyenne |
+| | Cursor → param page pour plus de comparables | | |
+| 4 | **Rate limiting global** | ⏳ | Moyenne |
+| | Sémaphore pour listing_details (anti-spam) | | |
+| 5 | **Saisonnalité avancée** | 🔄 | Haute |
+| | Haute/basse saison par mois + endpoint `/seasonality` | | |
+| 6 | **Rapport PDF + Email** | ⏳ | Moyenne |
+| | WeasyPrint + envoi via n8n SMTP | | |
+| 7 | **Feature premium refresh** | ⏳ | Basse |
+| | `refresh=true` pour bypass cache | | |
+
+### 🎯 Problématiques techniques actuelles
+
+**Images des logements** : Le MCP Server récupère toutes les données sauf les images Airbnb (placeholders Picsum actuellement)
+
+**UI à adapter** : Interface frontend à ajuster pour :
+- Affichage haute/basse saison
+- Pagination des comparables  
+- Graphiques de saisonnalité
+
+**Questions ouvertes** :
+- Comment obtenir prix haute/basse saison ? → Scraping mensuel avec dates témoins
+- Utilité pagination ? → Plus de comparables cohérents (distance, typologie)
+- Priorisation des développements ? → Saisonnalité puis occupation
+
+## Score global : 9/10 (révisé)
+- **Architecture**: 10/10 (microservices sophistiquée)
 - **Code quality**: 8/10 
-- **Fonctionnalités**: 9/10 (complet et fonctionnel)
-- **Documentation**: 5/10 (incohérente mais ne reflète pas la réalité)
-- **Prêt pour la production**: 8/10
+- **Fonctionnalités**: 9/10 (système complet et opérationnel)
+- **Documentation**: 6/10 (en cours de mise à jour)
+- **Prêt pour la production**: 9/10 (déjà fonctionnel avec vraies données)
