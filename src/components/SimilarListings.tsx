@@ -1,20 +1,11 @@
 /* src/components/SimilarListings.tsx */
 'use client';
 
-import Image from 'next/image';
-
-/** type minimal pour un listing */
-export interface Listing {
-  name: string;
-  adr: number;
-  occ: number;
-  dist: number;
-  src: string;
-  img: string;
-}
+import { Badge } from '@/components/ui/badge';
+import type { ComparableListing } from '@/services/vdc-solutions';
 
 interface Props {
-  listings: Listing[];
+  listings: ComparableListing[];
 }
 
 export default function SimilarListings({ listings }: Props) {
@@ -25,31 +16,89 @@ export default function SimilarListings({ listings }: Props) {
       </h3>
 
       {listings.map((l, i) => (
-        <div key={i} className="flex items-start gap-3 p-3 border rounded bg-card">
-          <Image
-            src={l.img}
-            alt={l.name}
-            width={96}
-            height={64}
-            className="rounded object-cover object-center shrink-0"
-            unoptimized
-          />
-          <div className="flex flex-col flex-1 min-w-0">
-            <span className="flex-1 min-w-0 font-semibold text-sm leading-snug line-clamp-2">
+        <div key={i} className="p-4 border rounded-lg bg-card hover:shadow-md transition-shadow">
+          {/* Header avec nom et lien */}
+          <div className="flex items-start justify-between gap-2 mb-3">
+            <h4 className="font-semibold text-sm leading-snug flex-1 line-clamp-2">
               {l.name}
-            </span>
-            <div className="mt-1 text-xs text-gray-600 flex flex-wrap gap-x-3">
-              <span>Prix moy. : {l.adr} €</span>
-              <span>Remplissage : {l.occ}%</span>
-              <span>Distance : {l.dist.toFixed(1).replace('.', ',')} km</span>
+            </h4>
+            {l.url && (
+              <a
+                href={l.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 flex-shrink-0 text-xs"
+                title="Voir sur Airbnb"
+              >
+                🔗 Voir
+              </a>
+            )}
+          </div>
+
+          {/* Métriques principales */}
+          <div className="grid grid-cols-2 gap-4 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-yellow-500">⭐</span>
+              <span className="text-sm">
+                <span className="font-semibold">{l.adr}€</span>
+                <span className="text-muted-foreground">/nuit</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-green-500">👥</span>
+              <span className="text-sm">
+                <span className="font-semibold">{l.occ}%</span>
+                <span className="text-muted-foreground"> occupé</span>
+              </span>
             </div>
           </div>
+
+          {/* Distance et source */}
+          <div className="flex items-center gap-4 mb-3">
+            <div className="flex items-center gap-1">
+              <span className="text-blue-500">📍</span>
+              <span className="text-xs text-muted-foreground">
+                {l.dist.toFixed(1).replace('.', ',')} km
+              </span>
+            </div>
+            <Badge variant="secondary" className="text-xs">
+              {l.src}
+            </Badge>
+          </div>
+
+          {/* Équipements (si disponibles) */}
+          {l.amenities && l.amenities.length > 0 && (
+            <div className="space-y-2">
+              <span className="text-xs font-medium text-muted-foreground">
+                🏠 Équipements principaux
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {l.amenities.slice(0, 4).map((amenity, idx) => (
+                  <Badge 
+                    key={idx} 
+                    variant="outline" 
+                    className="text-xs py-0.5 px-2"
+                  >
+                    {amenity}
+                  </Badge>
+                ))}
+                {l.amenities.length > 4 && (
+                  <Badge variant="outline" className="text-xs py-0.5 px-2">
+                    +{l.amenities.length - 4} autres
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       ))}
 
-      {!listings.length && (
-        <p className="text-sm text-muted-foreground">Aucun comparable disponible.</p>
-      )}
+              {!listings.length && (
+          <div className="text-center py-8 text-muted-foreground">
+            <p className="text-4xl mb-2">🏠</p>
+            <p className="text-sm">Aucun comparable disponible dans cette zone.</p>
+          </div>
+        )}
     </div>
   );
 }

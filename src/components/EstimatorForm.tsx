@@ -107,19 +107,71 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Adresse du logement (si vous n'avez pas de lien)</FormLabel>
+                  <FormLabel>Ville ou zone en Martinique</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="12 Rue de la Plage, Fort-de-France"
+                      placeholder="Ex: Fort-de-France, Trois-Îlets, Sainte-Anne..."
                       {...field}
                       disabled={isAirbnbMode || isLoading} // Disable if Airbnb mode OR loading
                       aria-invalid={form.formState.errors.address ? "true" : "false"}
+                      list="martinique-cities"
                       />
                   </FormControl>
                    <FormDescription>
-                     Ville ou quartier suffisent.
+                     Sélectionnez une ville, commune ou zone touristique de Martinique.
                    </FormDescription>
                   <FormMessage />
+                  
+                  {/* Datalist pour l'autocomplete */}
+                  <datalist id="martinique-cities">
+                    {/* Villes principales */}
+                    <option value="Fort-de-France">Fort-de-France (Préfecture)</option>
+                    <option value="Le Lamentin">Le Lamentin</option>
+                    <option value="Schoelcher">Schoelcher</option>
+                    <option value="Le Robert">Le Robert</option>
+                    
+                    {/* Zones touristiques */}
+                    <option value="Trois-Îlets">Trois-Îlets (Tourisme)</option>
+                    <option value="Sainte-Anne">Sainte-Anne (Tourisme)</option>
+                    <option value="Le Diamant">Le Diamant (Tourisme)</option>
+                    <option value="Sainte-Luce">Sainte-Luce (Tourisme)</option>
+                    <option value="Le Marin">Le Marin (Tourisme)</option>
+                    <option value="Le Vauclin">Le Vauclin (Tourisme)</option>
+                    
+                    {/* Zones spécifiques */}
+                    <option value="Pointe du Bout">Pointe du Bout (Zone)</option>
+                    <option value="Anse Mitan">Anse Mitan (Zone)</option>
+                    <option value="Anse à l'Ane">Anse à l'Ane (Zone)</option>
+                    <option value="Grande Anse">Grande Anse (Zone)</option>
+                    <option value="Salines">Salines (Zone)</option>
+                    <option value="Tartane">Tartane (Zone)</option>
+                    <option value="Presqu'île de la Caravelle">Presqu'île de la Caravelle</option>
+                    
+                    {/* Autres communes */}
+                    <option value="Case-Pilote">Case-Pilote</option>
+                    <option value="Bellefontaine">Bellefontaine</option>
+                    <option value="Le Carbet">Le Carbet</option>
+                    <option value="Saint-Pierre">Saint-Pierre</option>
+                    <option value="Le Prêcheur">Le Prêcheur</option>
+                    <option value="Basse-Pointe">Basse-Pointe</option>
+                    <option value="Macouba">Macouba</option>
+                    <option value="Grand-Rivière">Grand-Rivière</option>
+                    <option value="Ajoupa-Bouillon">Ajoupa-Bouillon</option>
+                    <option value="Lorrain">Lorrain</option>
+                    <option value="Marigot">Marigot</option>
+                    <option value="Sainte-Marie">Sainte-Marie</option>
+                    <option value="Gros-Morne">Gros-Morne</option>
+                    <option value="Trinité">Trinité</option>
+                    <option value="François">François</option>
+                    <option value="Rivière-Pilote">Rivière-Pilote</option>
+                    <option value="Rivière-Salée">Rivière-Salée</option>
+                    <option value="Ducos">Ducos</option>
+                    <option value="Anses-d'Arlet">Anses-d'Arlet</option>
+                    <option value="Fonds-Saint-Denis">Fonds-Saint-Denis</option>
+                    <option value="Morne-Rouge">Morne-Rouge</option>
+                    <option value="Morne-Vert">Morne-Vert</option>
+                    <option value="Saint-Joseph">Saint-Joseph</option>
+                  </datalist>
                 </FormItem>
               )}
             />
