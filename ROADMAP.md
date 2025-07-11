@@ -70,24 +70,39 @@ async def seasonality(address: str, adults: int = 2, year: int = 2025):
 
 ---
 
-### ⚡ Sprint 2 : Occupation réaliste (Priorité HAUTE)
+### ⚡ Sprint 2 : Occupation intelligente (Priorité HAUTE)
 
-**Objectif** : Remplacer le `occ: 60` fixe par un calcul intelligent
+**Objectif** : Algorithme sophistiqué vs PriceLabs (58% ajustée vs notre 60% fixe)
 
-#### Algorithme simplifié
+#### Insight concurrentiel
+- PriceLabs : Occupation ajustée 58% (algorithme exclusif)
+- Nous : 60% fixe pour tous les logements
+
+#### Algorithme amélioré multi-facteurs
 ```python
-def calculate_occupation(seasonality_curve, location_type="urban"):
-    base_occ = 0.4  # 40% de base
-    seasonal_bonus = 0.4 * (median(seasonality_curve) / max(seasonality_curve))
+def calculate_smart_occupation(listing, seasonality_data, location_type):
+    # Base selon type de zone (données Martinique)
+    base_occ = {
+        "urban": 0.45,        # Fort-de-France
+        "beach": 0.65,        # Sainte-Anne, Diamant  
+        "mountain": 0.35      # Intérieur Martinique
+    }.get(location_type, 0.50)
     
-    # Ajustements par zone
-    location_multiplier = {
-        "urban": 1.0,      # Fort-de-France
-        "beach": 1.2,      # Sainte-Anne
-        "mountain": 0.8    # Intérieur
-    }.get(location_type, 1.0)
+    # Bonus équipements (Sea view, Pool, etc.)
+    amenity_bonus = calculate_amenity_score(listing.amenities) * 0.10
     
-    return min(base_occ + seasonal_bonus * location_multiplier, 0.85)
+    # Facteur saisonnier 
+    seasonal_factor = (median(seasonality_data) / max(seasonality_data))
+    
+    # Évolution marché (données historiques)
+    market_trend = get_market_evolution(location, year=2024) # +5% vs 2023
+    
+    occupation = min(
+        base_occ + amenity_bonus + (seasonal_factor * 0.15) + market_trend,
+        0.85  # Cap à 85% max
+    )
+    
+    return round(occupation * 100)  # Retour en %
 ```
 
 #### Cache Redis
@@ -97,36 +112,41 @@ def calculate_occupation(seasonality_curve, location_type="urban"):
 
 ---
 
-### 🔍 Sprint 3 : Pagination intelligente (Priorité MOYENNE)
+### 🔍 Sprint 3 : Volume de données massif (Priorité HAUTE ⬆️)
 
-**Objectif** : Plus de comparables cohérents
+**Objectif** : Rivaliser avec PriceLabs (350 annonces vs nos 18 actuelles)
 
-#### Problématique actuelle
-- Airbnb retourne 18 annonces/page
-- Fort-de-France > 200 annonces disponibles
-- Page 0 = biais "guest favorites"
+#### Insight concurrentiel
+- PriceLabs : 350 annonces dans 15km radius
+- Nous : ~18 annonces (page 0 uniquement)
 
-#### Stratégie MVP
+#### Stratégie améliorée - Radius adaptatif
 ```python
 @app.get("/estimate")
-async def estimate(address: str, adults: int = 2, pages: int = 2):
+async def estimate(address: str, adults: int = 2, max_radius_km: int = 15):
     all_comps = []
+    radius_km = 5  # Commencer par 5km
     
-    for page in range(pages):
-        cursor = get_page_cursor(page)  # pagination logic
-        data = await airbnb_search(address, adults, cursor=cursor)
-        all_comps.extend(data["searchResults"])
+    while len(all_comps) < 300 and radius_km <= max_radius_km:
+        # Récupérer 5 pages par radius = ~90 annonces
+        for page in range(5):
+            data = await airbnb_search(
+                address, adults, 
+                page=page, 
+                radius_km=radius_km
+            )
+            all_comps.extend(data["searchResults"])
+        
+        radius_km += 2  # Élargir à 7km, 9km, etc.
     
-    # Filtrage intelligent
-    filtered_comps = filter_comparables(
-        all_comps,
-        max_distance_km=3,
-        same_bedrooms=adults,
-        min_amenities_overlap=0.3
-    )
-    
-    return format_response(filtered_comps)
+    # Filtrer et garder les 300 meilleurs comparables
+    return filter_best_comparables(all_comps[:300])
 ```
+
+#### Impact attendu
+- 🎯 **300+ comparables** vs 18 actuels
+- 📊 **Précision estimations** considérablement améliorée  
+- 🏆 **Niveau concurrentiel** PriceLabs
 
 #### Frontend ajustements
 - Liste scrollable des comparables
@@ -150,7 +170,42 @@ async def get_listing_details(listing_id):
 
 ---
 
-### 📄 Sprint 5 : Rapports PDF + Email (Priorité MOYENNE)
+### � Sprint 5 : Prix nets propriétaire (Priorité MOYENNE)
+
+**Objectif** : Calculer revenus réels propriétaire vs PriceLabs
+
+#### Insight concurrentiel
+- PriceLabs : "Prix avant commissions, taxes, frais de nettoyage"
+- Nous : Prix bruts Airbnb sans détail des frais
+
+#### Implémentation prix nets
+```python
+def calculate_net_owner_price(gross_airbnb_price):
+    """Calcule le revenu net réel du propriétaire"""
+    # Frais Airbnb (3% hôte + 14% voyageur sur total)
+    airbnb_commission = gross_airbnb_price * 0.03
+    
+    # Taxes locales Martinique
+    tourist_tax = 2.30  # € par nuit (DOM-TOM)
+    
+    # Frais nettoyage moyens Martinique
+    cleaning_fee = 45  # € (revenu séparé propriétaire)
+    
+    net_price = gross_airbnb_price - airbnb_commission - tourist_tax
+    
+    return {
+        "gross_price": gross_airbnb_price,
+        "net_owner_price": net_price,
+        "airbnb_commission": airbnb_commission,
+        "tourist_tax": tourist_tax,
+        "cleaning_fee": cleaning_fee,  # Revenue additionnel
+        "effective_yield": (net_price + cleaning_fee) / gross_airbnb_price
+    }
+```
+
+---
+
+### �📄 Sprint 6 : Rapports PDF + Email (Priorité MOYENNE)
 
 **Objectif** : Génération et envoi automatique de rapports
 
@@ -179,7 +234,44 @@ async def get_listing_details(listing_id):
 
 ---
 
-### 💎 Sprint 6 : Features premium (Priorité BASSE)
+### � Sprint 7 : Tendances historiques (Priorité MOYENNE)
+
+**Objectif** : Graphiques mensuels vs PriceLabs
+
+#### Insight concurrentiel
+- PriceLabs : Graphiques tendances mensuelles (revenus, tarifs, occupation)
+- Nous : Données instantanées uniquement
+
+#### Endpoint tendances
+```python
+@app.get("/trends")
+async def get_monthly_trends(address: str, year: int = 2024):
+    """Analyse 12 mois de données historiques"""
+    
+    trends = []
+    for month in range(1, 13):
+        # Données historiques via MCP
+        historical_data = await get_historical_month_data(address, month, year)
+        
+        trends.append({
+            "month": month,
+            "avg_revenue": historical_data.revenue,
+            "avg_adr": historical_data.adr, 
+            "avg_occupation": historical_data.occupation,
+            "num_listings": len(historical_data.comparables)
+        })
+    
+    return {
+        "address": address,
+        "year": year,
+        "monthly_trends": trends,
+        "yearly_summary": calculate_yearly_stats(trends)
+    }
+```
+
+---
+
+### �💎 Sprint 8 : Features premium (Priorité BASSE)
 
 #### Refresh forcé
 ```python
