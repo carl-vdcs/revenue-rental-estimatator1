@@ -109,12 +109,12 @@ export default function SimilarListings({ listings }: Props) {
         </div>
       ))}
 
-              {!listings.length && (
-          <div className="text-center py-8 text-muted-foreground">
-            <p className="text-4xl mb-2">🏠</p>
-            <p className="text-sm">Aucun comparable disponible dans cette zone.</p>
-          </div>
-        )}
+      {(!listings || listings.length === 0) && (
+        <div className="text-center py-8 text-muted-foreground">
+          <p className="text-4xl mb-2">🏠</p>
+          <p className="text-sm">Aucun comparable disponible dans cette zone.</p>
+        </div>
+      )}
     </div>
   );
 }
