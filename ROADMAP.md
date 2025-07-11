@@ -22,97 +22,126 @@ Le widget fonctionne avec de **vraies données Airbnb** récupérées via MCP Se
 
 ## 📋 Prochaines itérations par priorité
 
-### 🔥 Sprint 1 : Saisonnalité avancée (Priorité HAUTE)
+> **⚠️ NOUVEAU FOCUS** : Lead magnet crédible (pas concurrence PriceLabs)
+> 
+> **Objectif** : Générer 10-20 leads qualifiés/mois pour tester la traction
+> 
+> **Timeline** : 2-3 semaines max
 
-**Objectif** : Calculer les prix haute/basse saison automatiquement
+### 🔥 Sprint 1 : Volume suffisant (Priorité HAUTE)
 
-#### Implémentation backend
+**Objectif** : 50+ comparables pour crédibilité (vs 18 actuels)
+
+#### Stratégie simple et efficace
 ```python
-# utils/seasonality.py
-@cached(ttl=86400)
-async def get_seasonality(location, adults=2, year=2025):
-    sem = asyncio.Semaphore(3)
+@app.get("/estimate")
+async def estimate(address: str, adults: int = 2):
+    all_comps = []
     
-    async def _month(m):
-        checkin, checkout = probe_week(year, m)  # 2e semaine du mois
-        async with sem:
-            data = await airbnb_search(
-                location=location,
-                adults=adults, 
-                checkin=checkin,
-                checkout=checkout
-            )
-        prices = [extract_price(r) for r in data["searchResults"]]
-        return statistics.median(prices)
+    # 3 pages = ~54 annonces (suffisant pour crédibilité)
+    for page in range(3):
+        data = await airbnb_search(address, adults, page=page)
+        all_comps.extend(data["searchResults"])
     
-    return await asyncio.gather(*[_month(m) for m in range(1,13)])
+    # Filtrer dans 10km max (rayon raisonnable)
+    filtered = [c for c in all_comps if c.distance_km <= 10]
+    
+    return format_response(filtered[:50])  # Max 50 pour performance
+```
 
-# Route FastAPI
-@app.get("/seasonality")
-async def seasonality(address: str, adults: int = 2, year: int = 2025):
-    curve = await get_seasonality(address, adults, year)
-    hi, lo = max(curve), min(curve)
-    return {
-        "address": address,
-        "year": year, 
-        "seasonality": curve,
-        "highPrice": hi,
-        "lowPrice": lo,
-        "monthHigh": curve.index(hi) + 1,
-        "monthLow": curve.index(lo) + 1
+#### Impact lead magnet
+- **18 → 50+ comparables** = +180% crédibilité
+- **Message confiance** : "Basé sur 50+ annonces réelles"
+- **Performance maintenue** : <3s de réponse
+- **Timeline** : 3-4 jours d'implémentation
+
+---
+
+### ⚡ Sprint 2 : Occupation crédible (Priorité HAUTE)
+
+**Objectif** : Algo simple mais crédible (vs 60% fixe peu crédible)
+
+#### Problème actuel
+- **60% fixe** pour tous les logements = peu crédible
+- Utilisateurs voient que c'est "bidon"
+
+#### Algorithme simple mais réaliste
+```python
+def calculate_credible_occupation(location_name, amenities):
+    # Base selon zone (données publiques INSEE/Observatoire)
+    base_rates = {
+        "fort-de-france": 45,
+        "trois-ilets": 70, 
+        "sainte-anne": 75,
+        "le-diamant": 65,
+        "sainte-luce": 68,
+        "le-marin": 62,
+        "default": 55
     }
+    
+    base = base_rates.get(location_name.lower(), base_rates["default"])
+    
+    # Bonus équipements premium (simple)
+    premium_amenities = ["sea view", "pool", "air conditioning", "wifi"]
+    bonus = len([a for a in amenities if any(p in a.lower() for p in premium_amenities)]) * 3
+    
+    return min(base + bonus, 85)  # Cap 85%
 ```
 
-#### Frontend à adapter
-- Affichage graphique des 12 mois (Recharts)
-- Badges "Haute saison : Août ≈ 180€"
-- Toggle haute/basse saison dans l'interface
+#### Impact lead magnet
+- **Occupation variable 45-85%** selon zone/équipements
+- **Crédibilité locale** : Fort-de-France ≠ Sainte-Anne
+- **Timeline** : 2-3 jours d'implémentation
 
 ---
 
-### ⚡ Sprint 2 : Occupation intelligente (Priorité HAUTE)
+### 🎯 Sprint 3 : Lead capture UX (Priorité MOYENNE)
 
-**Objectif** : Algorithme sophistiqué vs PriceLabs (58% ajustée vs notre 60% fixe)
+**Objectif** : Convertir les visiteurs en leads qualifiés
 
-#### Insight concurrentiel
-- PriceLabs : Occupation ajustée 58% (algorithme exclusif)
-- Nous : 60% fixe pour tous les logements
+#### Améliorations UX critiques
+1. **Message de crédibilité** dans ResultsCard
+2. **CTA lead capture** optimisé
+3. **Formulaire email** simple
 
-#### Algorithme amélioré multi-facteurs
-```python
-def calculate_smart_occupation(listing, seasonality_data, location_type):
-    # Base selon type de zone (données Martinique)
-    base_occ = {
-        "urban": 0.45,        # Fort-de-France
-        "beach": 0.65,        # Sainte-Anne, Diamant  
-        "mountain": 0.35      # Intérieur Martinique
-    }.get(location_type, 0.50)
-    
-    # Bonus équipements (Sea view, Pool, etc.)
-    amenity_bonus = calculate_amenity_score(listing.amenities) * 0.10
-    
-    # Facteur saisonnier 
-    seasonal_factor = (median(seasonality_data) / max(seasonality_data))
-    
-    # Évolution marché (données historiques)
-    market_trend = get_market_evolution(location, year=2024) # +5% vs 2023
-    
-    occupation = min(
-        base_occ + amenity_bonus + (seasonal_factor * 0.15) + market_trend,
-        0.85  # Cap à 85% max
-    )
-    
-    return round(occupation * 100)  # Retour en %
+```tsx
+// Message de crédibilité 
+<div className="bg-blue-50 p-3 rounded mb-4">
+  <p className="text-sm text-blue-800">
+    📊 Estimation basée sur <strong>{comps.length} annonces réelles</strong> 
+    dans un rayon de 10km avec données Airbnb actualisées
+  </p>
+</div>
+
+// CTA amélioré
+<Button onClick={() => setShowLeadModal(true)}>
+  📧 Recevoir l'analyse détaillée par email
+</Button>
+
+// Modal lead capture
+const LeadCaptureModal = () => (
+  <Dialog open={showLeadModal}>
+    <DialogContent>
+      <h3>Recevez votre analyse détaillée</h3>
+      <form onSubmit={handleEmailCapture}>
+        <Input placeholder="Votre email" type="email" required />
+        <Input placeholder="Nom du projet (optionnel)" />
+        <Button type="submit">Envoyer l'analyse</Button>
+      </form>
+    </DialogContent>
+  </Dialog>
+);
 ```
 
-#### Cache Redis
-- Clé : `occ:{listing_id}` 
-- TTL : 24h
-- Invalidation si nouvelle data seasonality
+#### Impact lead magnet
+- **Taux de conversion** objectif : 15%
+- **Message confiance** visible
+- **CTA clair** et attractif
+- **Timeline** : 2-3 jours
 
 ---
 
-### 🔍 Sprint 3 : Volume de données massif (Priorité HAUTE ⬆️)
+### 🔍 Sprint 4 : Volume de données massif (Priorité BASSE - Post-traction)
 
 **Objectif** : Rivaliser avec PriceLabs (350 annonces vs nos 18 actuelles)
 
