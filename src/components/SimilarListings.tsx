@@ -9,27 +9,14 @@ interface Props {
 }
 
 export default function SimilarListings({ listings }: Props) {
-  // Debug pour voir les données reçues
-  console.log('SimilarListings - données reçues:', listings);
-  
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-secondary">
-        Listings similaires dans votre secteur ({listings.length} trouvés)
+        Listings similaires dans votre secteur
       </h3>
       
-      {/* Debug info temporaire */}
-      {listings.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
-          <p className="text-xs text-blue-800">
-            🔧 <strong>Debug :</strong> {listings.length} comparables trouvés. 
-            Premier listing : {JSON.stringify(listings[0], null, 2).substring(0, 100)}...
-          </p>
-        </div>
-      )}
-      
       {/* Disclaimer occupation */}
-      {listings.length > 0 && (
+      {listings && listings.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded p-3 mb-4">
           <p className="text-xs text-amber-800">
             ⚠️ <strong>Note :</strong> Les taux d'occupation affichés sont des estimations préliminaires. 
@@ -38,7 +25,7 @@ export default function SimilarListings({ listings }: Props) {
         </div>
       )}
 
-      {listings.map((l, i) => (
+      {listings && listings.map((l, i) => (
         <div key={i} className="p-4 border rounded-lg bg-card hover:shadow-md transition-shadow">
           {/* Header avec nom et lien */}
           <div className="flex items-start justify-between gap-2 mb-3">
