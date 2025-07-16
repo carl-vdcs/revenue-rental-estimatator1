@@ -107,17 +107,17 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Adresse du logement (si vous n'avez pas de lien)</FormLabel>
+                  <FormLabel>Ville ou zone en Martinique</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="12 Rue de la Plage, Fort-de-France"
+                      placeholder="Ex: Fort-de-France, Trois-Îlets, Sainte-Anne..."
                       {...field}
-                      disabled={isAirbnbMode || isLoading} // Disable if Airbnb mode OR loading
+                      disabled={isAirbnbMode || isLoading} 
                       aria-invalid={form.formState.errors.address ? "true" : "false"}
                       />
                   </FormControl>
                    <FormDescription>
-                     Ville ou quartier suffisent.
+                     Saisissez le nom d'une ville, commune ou zone de Martinique.
                    </FormDescription>
                   <FormMessage />
                 </FormItem>

@@ -1,0 +1,386 @@
+{
+  "name": "Martinique Estimator API",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "estimate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        -260
+      ],
+      "id": "65ba9060-1385-4359-b40b-327a858f7e3b",
+      "name": "Webhook",
+      "webhookId": "27006c1b-d53e-4f05-b4fb-67319aa68559"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        420,
+        -200
+      ],
+      "id": "eb1ed8a1-991f-4ef2-a96d-006d059e1c4b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const qs = $json.query;\n\n// ----- 1. Paramètres entrés ou valeurs par défaut\nconst bedrooms = parseInt(qs.bedrooms ?? 2, 10);\nconst basePrice = 80 + (bedrooms - 1) * 20 + Math.random() * 20;   // ADR médian\nconst p50 = Math.round(basePrice);\nconst p75 = Math.round(basePrice * 1.25);\n\nconst occ = 60 + Math.random() * 25;            // taux d'occupation %\nconst annual = Math.round(p50 * (occ / 100) * 365);\n\n// ----- 2. Mock listings comparables\nconst comps = Array.from({ length: 4 }).map((_, i) => ({\n  name: `Listing démo #${i + 1}`,\n  adr: Math.round(basePrice + (Math.random() * 30 - 15)),\n  occ: Math.round(occ + (Math.random() * 10 - 5)),\n  dist: Number((Math.random() * 4 + 0.5).toFixed(1)), // 0,5 ⇒ 4,5 km\n  src: [\"Airbnb\", \"Booking.com\", \"Abritel\"][i % 3],\n  img: `https://picsum.photos/seed/mock${i}/100/80`,\n}));\n\n// ----- 3. Payload final\nreturn {\n  json: {\n    medianPrice: p50,\n    p75Price: p75,\n    annualRevenue: annual,\n    seasonality: [150, 140, 130, 120, 110, 100, 90, 80, 95, 110, 130, 145],\n    comps,\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9ee60945-5a49-483d-8ac6-63580ea557e0",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e358020e-3376-4867-a851-6b89e7f53125",
+              "name": "location",
+              "value": "={{ $json.query.address }}",
+              "type": "string"
+            },
+            {
+              "id": "cc45b977-2b9b-4796-a2dd-3cd24c8cc934",
+              "name": "adults",
+              "value": "={{ parseInt($json.query.bedrooms) }}",
+              "type": "number"
+            },
+            {
+              "id": "32177758-82af-4c2a-97c8-fcf89a349bb6",
+              "name": "maxPrice",
+              "value": "={{ $json.query.price === \"\" ? null : parseFloat($json.query.price) }}",
+              "type": "number"
+            },
+            {
+              "id": "ff2e5b73-08c1-4e10-a2f0-bfb7222cf102",
+              "name": "toolName",
+              "value": "airbnb_search",
+              "type": "string"
+            },
+            {
+              "id": "018b3dba-4d8b-4e53-8590-b8daeb877429",
+              "name": "ignoreRobots",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -120,
+        -620
+      ],
+      "id": "026b6d76-0843-440e-8d5b-7af2cab98882",
+      "name": "Prepare MCP Args"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ac8276da-afa4-4356-9e74-702c1e9bdf73",
+              "name": "stdinJsonString",
+              "value": "=// 1. Crée l'objet pour les arguments\nconst args = {\n  location: {{ $('Prepare MCP Args').item.json.location }}, // n8n insère la valeur string ici\n  adults: {{ $('Prepare MCP Args').item.json.adults }}      // n8n insère la valeur number ici\n};\n\n// 2. Ajoute maxPrice conditionnellement SI elle n'est PAS null\nif ( {{ $('Prepare MCP Args').item.json.maxPrice }} !== null ) {\n  args.maxPrice = {{ $('Prepare MCP Args').item.json.maxPrice }}; // n8n insère la valeur number ici\n}\n\n// 3. Crée l'objet payload final avec le nom de l'outil et les arguments construits\nconst payload = {\n  params: {\n    name: {{ $('Prepare MCP Args').item.json.toolName }}, // n8n insère la valeur string ici\n    arguments: args // L'objet args complet est inséré ici\n  }\n};\n\n// 4. Convertit l'objet JavaScript 'payload' final en chaîne JSON\nreturn JSON.stringify(payload);",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        380,
+        -540
+      ],
+      "id": "c4f241a3-e74b-4d80-9210-044e720c8f67",
+      "name": "Build Stdin JSON"
+    },
+    {
+      "parameters": {
+        "command": "=// Chemin vers le script DANS le conteneur n8n\nconst scriptPath = '/mcp-code/dist/index.js';\n// Récupère le flag depuis le nœud de préparation\nconst ignoreRobotsFlag = {{ $('Prepare MCP Args').item.json.ignoreRobots }} ? '--ignore-robots-txt' : '';\n\n// Récupère la chaîne JSON qui a été CORRECTEMENT générée par le nœud 'Build Stdin JSON'\nconst stdinJsonString = {{ $('Build Stdin JSON').item.json.stdinJsonString }};\n\n// Échappe les apostrophes simples dans la chaîne JSON pour la commande 'echo'\nconst escapedStdinJson = stdinJsonString.replace(/'/g, \"'\\\\''\");\n\n// Construit la commande shell finale et la retourne\n// C'est CETTE chaîne qui sera exécutée par /bin/sh\nconst command = `echo '${escapedStdinJson}' | node ${scriptPath} ${ignoreRobotsFlag}`;\n\nreturn command;"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        600,
+        -520
+      ],
+      "id": "408e31fa-d0ad-4701-99f4-b7c213efa858",
+      "name": "Call MCP Server"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4c153d8d-e325-4d03-9b8c-b090ede05dc6",
+              "name": "mcpResult",
+              "value": "=JSON.parse({{ $('Call MCP Server').item.json.stdout }})",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        940,
+        -460
+      ],
+      "id": "9a4209ba-0d00-4f58-b614-3d607ef4fcad",
+      "name": "Parse MCP Output"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Récupère les données de la query du webhook\nconst query = $input.item.json.query;\n\n// Prépare les arguments pour le script MCP\nconst args = {\n  location: query.address,\n  // Convertit le nombre de chambres (string) en 'adults' (number)\n  adults: parseInt(query.bedrooms) || 1 // Met 1 par défaut si la conversion échoue\n};\n\n// Gère le prix optionnel (convertit en nombre si non vide, sinon null)\nconst price = query.price;\nif (price && price !== \"\") {\n  args.maxPrice = parseFloat(price);\n}\n\n// Définit le nom de l'outil à appeler\nconst toolName = \"airbnb_search\";\n\n// Construit l'objet payload final\nconst payload = {\n  params: {\n    name: toolName,\n    arguments: args\n  }\n};\n\n// Renvoie le payload structuré pour le nœud suivant\n// n8n attend un tableau d'objets { json: ... }\nreturn [{ json: payload }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -460
+      ],
+      "id": "ac03d59b-fc48-4f40-ba53-8a2dcef820e2",
+      "name": "Build Payload"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Chemin vers le script DANS le conteneur n8n\nconst scriptPath = '/mcp-code/dist/index.js';\n\n// Détermine si on ignore robots.txt (tu peux rendre ça dynamique si besoin)\nconst ignoreRobots = true; // ou false, ou récupérer depuis une étape précédente\nconst ignoreRobotsFlag = ignoreRobots ? '--ignore-robots-txt' : '';\n\n// Récupère l'objet payload de l'étape précédente\nconst payload = $input.item.json;\n\n// Convertit l'objet payload en chaîne JSON\nconst stdinJsonString = JSON.stringify(payload);\n\n// Échappe les apostrophes simples pour la commande 'echo'\nconst escapedStdinJson = stdinJsonString.replace(/'/g, \"'\\\\''\");\n\n// Construit la commande shell finale\nconst command = `echo '${escapedStdinJson}' | node ${scriptPath} ${ignoreRobotsFlag}`;\n\n// Renvoie la commande prête à être exécutée\nreturn [{ json: { command: command } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        -440
+      ],
+      "id": "4e6c9c4b-bf51-496e-b8b1-bce230193f73",
+      "name": "Build Command"
+    },
+    {
+      "parameters": {
+        "command": "={{ $input.item.json.command }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -360
+      ],
+      "id": "c550a074-d53e-4c69-a7a8-6b469cbc6a81",
+      "name": "Call MCP Server1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Récupère la sortie standard (stdout) du nœud précédent\nconst stdout = $input.item.json.stdout;\nlet parsedOutput = {};\n\ntry {\n  // Tente de parser la sortie JSON\n  parsedOutput = JSON.parse(stdout);\n} catch (error) {\n  // Gère les erreurs si stdout n'est pas du JSON valide\n  console.error(\"Erreur lors du parsing de la sortie MCP:\", error);\n  // Renvoie l'erreur ou un objet vide/spécifique\n  parsedOutput = { error: \"Failed to parse MCP output\", rawOutput: stdout };\n}\n\n// Renvoie le résultat parsé\nreturn [{ json: parsedOutput }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        -360
+      ],
+      "id": "780aeba6-18e1-4505-a7dd-24f722be5952",
+      "name": "Parse Output"
+    },
+    {
+      "parameters": {
+        "url": "http://estimate-api:8080/estimate",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "address",
+              "value": "={{$json.query.address}}"
+            },
+            {
+              "name": "adults",
+              "value": "={{$json.query.bedrooms}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        -260
+      ],
+      "id": "5d6c3373-c8bd-44a3-8c19-ccaf4d6df9ce",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "http://estimate-api:8080/estimate?address=Paris&adults=2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -440,
+        -540
+      ],
+      "id": "78e62522-ac1f-4611-8f40-fcbcdace42f3",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ------------------------------------------\n//  Entrée :  HTTP Request             ➜ items[0].json\n//            {\n//              address, adults,\n//              medianPrice, p75Price,\n//              annualRevenue, comps:[{name,price,url}]\n//            }\n// ------------------------------------------\n\nconst data = items[0].json;\n\n// --- 1. Seasonality mock (p75 - 10 €) ----\ndata.seasonality = Array(12).fill(Math.max(data.p75Price - 10, 0));\n\n// --- 2. Remap comps  ----------------------\ndata.comps = (data.comps || []).map((c, i) => ({\n  name: c.name,\n  adr:  c.price,                // renommage\n  occ:  60,                     // % d'occ. fixe pour l'instant\n  dist: 0,                      // km : à calculer plus tard\n  src:  \"Airbnb\",\n  img:  c.img || `https://picsum.photos/seed/mock${i}/100/80`,\n}));\n\n// --- 3. Nettoyage & sortie ---------------\nreturn [{ json: data }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        180,
+        -220
+      ],
+      "id": "1c1904eb-cb5e-48dd-ad3a-f6d754bc6779",
+      "name": "Code1"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    },
+    "Prepare MCP Args": {
+      "main": [
+        [
+          {
+            "node": "Build Stdin JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Stdin JSON": {
+      "main": [
+        [
+          {
+            "node": "Call MCP Server",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call MCP Server": {
+      "main": [
+        [
+          {
+            "node": "Parse MCP Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse MCP Output": {
+      "main": [
+        []
+      ]
+    },
+    "Build Payload": {
+      "main": [
+        [
+          {
+            "node": "Build Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Command": {
+      "main": [
+        [
+          {
+            "node": "Call MCP Server1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call MCP Server1": {
+      "main": [
+        [
+          {
+            "node": "Parse Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Output": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5e1072afef1aeccee8f563784559c4ed154aae0877335b28381faebd0e2a6133"
+  }
+}

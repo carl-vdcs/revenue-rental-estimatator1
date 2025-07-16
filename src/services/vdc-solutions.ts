@@ -22,12 +22,26 @@ export interface EstimateParams {
 }
 
 /**
+ * Represents a comparable property listing.
+ */
+export interface ComparableListing {
+  name: string;
+  adr: number;
+  occ: number;
+  dist: number;
+  src: string;
+  img: string;
+  amenities?: string[];
+  url?: string;
+}
+
+/**
  * Represents the estimation results for a property.
  */
 export interface EstimateResult {
-  seasonality: number;
+  seasonality: number[];
 
-  comps: any;
+  comps: ComparableListing[];
   /**
    * The median price per night of comparable properties.
    */
@@ -51,11 +65,11 @@ export interface EstimateResult {
   /**
    * The latitude of the property.
    */
-  latitude: number;
+  latitude?: number;
   /**
    * The longitude of the property.
    */
-  longitude: number;
+  longitude?: number;
 }
 
 /**
