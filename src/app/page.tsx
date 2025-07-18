@@ -15,6 +15,19 @@ export default function Home() {
   const [results, setResults]  = useSessionState<EstimateResult | null>('estim-result', null);
   const [params,  setParams]   = useSessionState<EstimateParams  | null>('estim-params', null);
 
+  const clearAllData = () => {
+    // Vider sessionStorage
+    sessionStorage.clear();
+    // Réinitialiser les états
+    setResults(null);
+    setParams(null);
+    // Feedback utilisateur
+    toast({ 
+      title: '✅ Données effacées', 
+      description: 'SessionStorage vidé, vous pouvez refaire un test.' 
+    });
+  };
+
   const handleSubmit = async (
     v: Omit<EstimateParams, 'currentPrice'> & { currentPrice?: number },
   ) => {
@@ -54,7 +67,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col items-center min-h-screen">
+    <main className="flex flex-col items-center min-h-screen relative">
       {!results && !loading && (
         <EstimatorForm onSubmit={handleSubmit} isLoading={loading} />
       )}
@@ -62,6 +75,15 @@ export default function Home() {
       {results && !loading && params && (
         <ResultsCard results={results} params={params} />
       )}
+      
+      {/* Bouton clear data - Position fixe en bas à droite */}
+      <button
+        onClick={clearAllData}
+        className="fixed bottom-4 right-4 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-full shadow-lg transition-colors text-xs font-medium border border-red-200"
+        title="Vider les données en cache pour retester"
+      >
+        🗑️ Clear Cache
+      </button>
     </main>
   );
 }
