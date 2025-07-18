@@ -101,24 +101,18 @@ export default function SimilarListings({ listings, medianPrice }: Props) {
         </div>
       ))}
 
-<<<<<<< HEAD
-              {!listings.length && (
-          <div className="text-center py-8 text-muted-foreground">
-            <p className="text-4xl mb-2">🏠</p>
-            <p className="text-sm">Aucun comparable disponible dans cette zone.</p>
-          </div>
-        )}
-=======
       {!listings.length && (
-        <p className="text-sm text-muted-foreground">Aucun comparable disponible.</p>
+        <div className="text-center py-8 text-muted-foreground">
+          <p className="text-4xl mb-2">🏠</p>
+          <p className="text-sm">Aucun comparable disponible dans cette zone.</p>
+        </div>
       )}
       
-      {medianPrice && !listings.some(l => l.adr) && (
+      {medianPrice && listings.length > 0 && !listings.some(l => l.adr) && (
         <p className="text-xs text-muted-foreground italic">
           *Prix estimé basé sur la médiane locale
         </p>
       )}
->>>>>>> origin/cursor/debug-backend-price-retrieval-for-saint-luce-d677
     </div>
   );
 }
