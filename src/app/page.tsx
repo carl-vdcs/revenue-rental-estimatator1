@@ -5,6 +5,7 @@ import { useSessionState } from '@/hooks/useSessionState';
 import EstimatorForm from '@/components/EstimatorForm';
 import ResultsCard from '@/components/ResultsCard';
 import type { EstimateParams, EstimateResult } from '@/services/vdc-solutions';
+import { estimateProperty } from '@/services/vdc-solutions';
 import { useToast } from '@/hooks/use-toast';
 import Loader from '@/components/Loader';
 
@@ -24,23 +25,29 @@ export default function Home() {
     setParams(p);
 
     try {
-      const base = process.env.NEXT_PUBLIC_API_BASE!;
-      const qs   = new URLSearchParams({
-        address  : p.address  ?? '',
-        bedrooms : p.bedrooms ? String(p.bedrooms) : '',
-        price    : p.currentPrice ? String(p.currentPrice) : '',
-      });
-      const res  = await fetch(`${base}/estimate?${qs}`, { cache:'no-store' });
-      if (!res.ok) throw new Error(`API ${res.status}`);
-
-      const json: EstimateResult = await res.json();
-      if (!json.comps?.length) {
-        toast({ title:'Pas de comparables', variant:'destructive' });
+      // Appel direct au service qui utilise maintenant l'API Cloudflare
+      const result = await estimateProperty(p);
+      
+      if (!result || !result.comps?.length) {
+        toast({ 
+          title: 'Pas de comparables', 
+          description: 'Aucune propriété comparable trouvée dans cette zone.',
+          variant: 'destructive' 
+        });
       } else {
-        setResults(json);
+        setResults(result);
+        toast({
+          title: 'Estimation réussie',
+          description: `${result.comps.length} propriétés comparables trouvées.`,
+        });
       }
-    } catch (e:any) {
-      toast({ title:'Erreur API', description:e.message, variant:'destructive' });
+    } catch (error: any) {
+      console.error('Estimation error:', error);
+      toast({ 
+        title: 'Erreur d\'estimation', 
+        description: error.message || 'Une erreur est survenue lors de l\'estimation.',
+        variant: 'destructive' 
+      });
     } finally {
       setLoading(false);
     }
