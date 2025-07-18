@@ -42,7 +42,7 @@ export default function ResultsCard({ results, params }: Props) {
       <CardContent className="p-0">
         {/* LISTINGS similaires */}
         <div className="p-4 border-b">
-          <SimilarListings listings={comps} />
+          <SimilarListings listings={comps} medianPrice={medianPrice} />
         </div>
 
         {/* KPIs */}
