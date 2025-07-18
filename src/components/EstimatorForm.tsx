@@ -26,8 +26,15 @@ const formSchema = z.object({
   address: z.string().optional(),
   bedrooms: z.coerce.number().int().positive({ message: "Le nombre de chambres doit être positif." }).optional(),
   currentPrice: z.coerce.number().positive({ message: "Le tarif actuel doit être positif." }).optional(), // Made optional
-}).refine(data => !!data.airbnbUrl || (!!data.address && !!data.bedrooms), {
-  message: "⚠️ Merci de compléter les champs obligatoires.",
+}).refine(data => {
+  const hasAirbnbUrl = !!data.airbnbUrl && data.airbnbUrl.trim() !== '';
+  const hasAddress = !!data.address && data.address.trim() !== '';
+  console.log('🔍 [DEBUG] Validation refine - hasAirbnbUrl:', hasAirbnbUrl);
+  console.log('🔍 [DEBUG] Validation refine - hasAddress:', hasAddress);
+  console.log('🔍 [DEBUG] Validation refine - data:', data);
+  return hasAirbnbUrl || hasAddress; // Allow either Airbnb URL OR just address (bedrooms not mandatory)
+}, {
+  message: "⚠️ Merci de remplir soit l'URL Airbnb soit l'adresse.",
   path: ["airbnbUrl"], // Attach error message to airbnbUrl field visually, though it applies globally
 });
 
@@ -61,6 +68,10 @@ const EstimatorForm: React.FC<EstimatorFormProps> = ({ onSubmit, isLoading }) =>
 
   // Simplified submit handler - just calls the passed onSubmit
   const handleFormSubmit: SubmitHandler<EstimatorFormValues> = (data) => {
+      console.log('🔍 [DEBUG] Form handleFormSubmit called with:', data);
+      console.log('🔍 [DEBUG] Form data.address:', data.address);
+      console.log('🔍 [DEBUG] Form data.airbnbUrl:', data.airbnbUrl);
+      console.log('🔍 [DEBUG] Form data.bedrooms:', data.bedrooms);
       onSubmit(data);
   };
 

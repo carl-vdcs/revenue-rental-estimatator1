@@ -98,7 +98,10 @@ export interface EstimateResult {
  * @returns A promise that resolves to an EstimateResult object, or null if no comparable properties are found.
  */
 export async function estimateProperty(params: EstimateParams): Promise<EstimateResult | null> {
-  console.log('Calling estimateProperty with params:', params);
+  console.log('🔍 [DEBUG] Calling estimateProperty with params:', params);
+  console.log('🔍 [DEBUG] params.address:', params.address);
+  console.log('🔍 [DEBUG] params.airbnbUrl:', params.airbnbUrl);
+  console.log('🔍 [DEBUG] params.bedrooms:', params.bedrooms);
 
   try {
     // Construire l'URL de l'API Cloudflare
@@ -106,8 +109,13 @@ export async function estimateProperty(params: EstimateParams): Promise<Estimate
     
     // Ajouter les paramètres requis
     if (params.address) {
+      console.log('🔍 [DEBUG] Using address:', params.address);
       apiUrl.searchParams.set('address', params.address);
+    } else if (params.airbnbUrl) {
+      console.log('🔍 [DEBUG] AirbnbUrl provided but no address extraction logic!');
+      throw new Error('Address extraction from Airbnb URL not implemented yet');
     } else {
+      console.log('🔍 [DEBUG] Neither address nor airbnbUrl provided');
       throw new Error('Address is required');
     }
     
@@ -115,7 +123,7 @@ export async function estimateProperty(params: EstimateParams): Promise<Estimate
     const adults = params.bedrooms ? Math.max(2, params.bedrooms * 2) : 2;
     apiUrl.searchParams.set('adults', adults.toString());
 
-    console.log('Calling Cloudflare API:', apiUrl.toString());
+    console.log('🔍 [DEBUG] Final API URL:', apiUrl.toString());
 
     // Appel à l'API Cloudflare
     const response = await fetch(apiUrl.toString(), {
