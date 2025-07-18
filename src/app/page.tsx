@@ -31,10 +31,12 @@ export default function Home() {
   const handleSubmit = async (
     v: Omit<EstimateParams, 'currentPrice'> & { currentPrice?: number },
   ) => {
+    console.log('🔍 [DEBUG] Form submitted with values:', v);
     setLoading(true);
     setResults(null);
 
     const p: EstimateParams = { ...v, currentPrice: v.currentPrice ?? 0 };
+    console.log('🔍 [DEBUG] Final EstimateParams:', p);
     setParams(p);
 
     try {
