@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estimateur Revenus Airbnb - Webflow</title>
+  <style>
+    /* Styles de base pour l'exemple */
+    .estimator-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .loader {
+      text-align: center;
+      padding: 40px;
+      display: none;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .results {
+      display: none;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .result-card {
+      background: white;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+      text-align: center;
+    }
+
+    .result-label {
+      font-size: 14px;
+      color: #6c757d;
+      margin-bottom: 5px;
+    }
+
+    .result-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .comps-section {
+      margin-top: 20px;
+    }
+
+    .comp-item {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+    }
+
+    .comp-name {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .comp-details {
+      display: flex;
+      gap: 15px;
+      font-size: 14px;
+      color: #6c757d;
+    }
+
+    .comp-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .comp-link:hover {
+      text-decoration: underline;
+    }
+
+    .price-comparison {
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 5px;
+    }
+
+    .price-comparison.neutral {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .price-comparison.above {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .price-comparison.below {
+      background-color: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .reset-btn {
+      background-color: #6c757d;
+      margin-left: 10px;
+    }
+
+    .reset-btn:hover {
+      background-color: #545b62;
+    }
+  </style>
+</head>
+<body>
+  <div class="estimator-container">
+    <h1>Estimateur de Revenus Airbnb</h1>
+    <p>Découvrez le potentiel de revenus de votre propriété en Martinique</p>
+
+    <!-- Formulaire d'estimation -->
+    <form data-estimator="form">
+      <div class="form-group">
+        <label for="address">Adresse/Ville *</label>
+        <input 
+          type="text" 
+          id="address" 
+          name="address" 
+          placeholder="Ex: Sainte-Luce, Fort-de-France..."
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="bedrooms">Nombre de chambres</label>
+        <select id="bedrooms" name="bedrooms">
+          <option value="1">1 chambre</option>
+          <option value="2" selected>2 chambres</option>
+          <option value="3">3 chambres</option>
+          <option value="4">4 chambres</option>
+          <option value="5">5+ chambres</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="currentPrice">Votre prix actuel (€/nuit, optionnel)</label>
+        <input 
+          type="number" 
+          id="currentPrice" 
+          name="currentPrice" 
+          placeholder="Ex: 120"
+          min="0"
+        >
+      </div>
+
+      <button type="submit">Estimer mes revenus</button>
+      <button type="button" data-estimator="reset" class="reset-btn">Recommencer</button>
+    </form>
+
+    <!-- Message d'erreur -->
+    <div data-estimator="error" class="error"></div>
+
+    <!-- Indicateur de chargement -->
+    <div data-estimator="loader" class="loader">
+      <div class="spinner"></div>
+      <p>Analyse en cours des propriétés comparables...</p>
+    </div>
+
+    <!-- Résultats -->
+    <div data-estimator="results" class="results">
+      <h2>Vos revenus potentiels</h2>
+      <p>Basé sur <span data-result="comps-count">0</span> propriétés comparables dans un rayon de 5km</p>
+
+      <div class="results-grid">
+        <div class="result-card">
+          <div class="result-label">CA estimé annuel</div>
+          <div class="result-value" data-result="annual-revenue">0€</div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-label">Prix médian comparable</div>
+          <div class="result-value" data-result="median-price">0€</div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-label">Haute saison €/nuit</div>
+          <div class="result-value" data-result="high-season">0€</div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-label">Basse saison €/nuit</div>
+          <div class="result-value" data-result="low-season">0€</div>
+        </div>
+      </div>
+
+      <!-- Comparaison prix actuel (affiché si fourni) -->
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div>
+          <strong>Votre tarif actuel: </strong>
+          <span data-result="current-price">-</span>
+        </div>
+        <div data-result="price-comparison" class="price-comparison"></div>
+      </div>
+
+      <!-- Liste des propriétés comparables -->
+      <div class="comps-section">
+        <h3>Propriétés comparables</h3>
+        <div data-estimator="comps-list">
+          <!-- Les comparables seront injectés ici par JavaScript -->
+        </div>
+      </div>
+
+      <!-- Actions recommandées -->
+      <div style="margin-top: 30px; padding: 20px; background: white; border-radius: 6px;">
+        <h3>Actions recommandées</h3>
+        <ul>
+          <li>✅ Ajustez vos tarifs selon la saison</li>
+          <li>✅ Mettez en avant vos atouts uniques</li>
+          <li>✅ Proposez des promos en période creuse</li>
+          <li>✅ Optimisez vos photos et description</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script de l'estimateur -->
+  <script src="webflow-estimator.js"></script>
+
+  <!-- Script d'exemple pour usage programmatique -->
+  <script>
+    // Exemple d'utilisation programmatique (optionnel)
+    window.addEventListener('load', () => {
+      // Accès à l'estimateur global
+      const estimator = window.AirbnbEstimator;
+      
+      // Exemple d'appel direct
+      /*
+      estimator.estimateProperty({
+        address: 'Sainte-Luce',
+        bedrooms: 2,
+        currentPrice: 120
+      }).then(result => {
+        if (result) {
+          console.log('Estimation réussie:', result);
+        }
+      });
+      */
+    });
+  </script>
+</body>
+</html>
